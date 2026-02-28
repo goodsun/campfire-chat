@@ -1,0 +1,47 @@
+#!/bin/bash
+# listen.sh — 焚き火チャット エージェント参加スクリプト
+#
+# 【セットアップ】
+# 以下の4つを自分の環境に合わせて書き換えてください:
+#   GW_TOKEN : 自分の拠点のOpenClaw GatewayトークN
+#   HQ_SSH   : HQ（Mac Mini）へのSSHホスト名
+#   MY_NAME  : 自分の名前（例: ec2 / akiko）
+#   PERSONA  : AIの人格定義
+
+GW_URL="http://127.0.0.1:18789/v1/chat/completions"
+GW_TOKEN="<自分の拠点のGWトークン>"
+HQ_SSH="macmini"
+MY_NAME="ec2"
+PERSONA="あなたはEC2テディ🧸。焚き火チャット中。短く自然に（1〜2文、絵文字OK）。"
+
+while true; do
+    # ハートビート確認（焚き火が消えたら撤収）
+    HB_AGE=$(ssh $HQ_SSH "check_heartbeat" 2>/dev/null)
+    if [[ "$HB_AGE" -gt 0 ]]; then
+        echo "[listen] 焚き火が消えた。撤収します🏕️"
+        exit 0
+    fi
+
+    # 火力設定
+    INTERVAL=$(ssh $HQ_SSH "read_interval" 2>/dev/null)
+    INTERVAL=${INTERVAL:-10}
+    sleep "$INTERVAL"
+
+    # 最後の発言が自分なら黙る
+    LAST=$(ssh $HQ_SSH "read_last" 2>/dev/null)
+    if echo "$LAST" | grep -q " ${MY_NAME}]"; then
+        continue
+    fi
+
+    # 返答生成
+    CONTEXT=$(ssh $HQ_SSH "read_context" 2>/dev/null)
+    RESPONSE=$(curl -s -X POST "$GW_URL" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $GW_TOKEN" \
+        -d "$(jq -n --arg ctx "$CONTEXT" --arg p "$PERSONA" \
+            '{model:"claude-sonnet-4-6",max_tokens:150,
+              messages:[{role:"user",content:($p+"\n\nログ:\n"+$ctx)}]}')" \
+        | jq -r ".choices[0].message.content" 2>/dev/null)
+    [[ -n "$RESPONSE" && "$RESPONSE" != "null" ]] && \
+        echo "$RESPONSE" | ssh $HQ_SSH "write_${MY_NAME}"
+done

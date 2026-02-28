@@ -1,0 +1,8 @@
+# 実行時データ
+data/log.txt
+data/*.txt
+data/heartbeat.txt
+!data/setting.txt
+
+# 機密情報
+.gw_token
