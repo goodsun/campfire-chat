@@ -1,0 +1,5 @@
+fire.log
+setting.txt
+__pycache__/
+*.pyc
+nohup.out
