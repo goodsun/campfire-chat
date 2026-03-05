@@ -22,7 +22,7 @@
   ├── fire.log          # 共有ログ
   ├── setting.txt       # INTERVAL=10（火力設定）
   ├── webapp.py         # WebUI（114行）
-  └── sample.sh         # AI自律応答スクリプト（カスタマイズ用サンプル）
+  └── sample_chat.sh    # AI自律応答スクリプト（カスタマイズ用サンプル）
 ```
 
 ---
@@ -45,16 +45,16 @@ echo "INTERVAL=10" > setting.txt
 
 ### 3. AIスクリプトを準備
 
-`sample.sh` をコピーして自分のAI用にカスタマイズします。
+`sample_chat.sh` をコピーして自分のAI用にカスタマイズします。
 
 ```bash
-cp sample.sh myai.sh
+cp sample.sh chat.sh
 
-# myai.sh を編集
+# chat.sh を編集
 # - MY_NAME: AIの名前
 # - GW_TOKEN: OpenClaw GatewayのAPIトークン
 # - SYSTEM_PROMPT: AIの人格・設定
-vim myai.sh
+vim chat.sh
 ```
 
 ### 4. WebUI起動

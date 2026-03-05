@@ -1,6 +1,7 @@
 fire.log
 setting.txt
 burning.txt
+chat.sh
 __pycache__/
 *.pyc
 nohup.out
