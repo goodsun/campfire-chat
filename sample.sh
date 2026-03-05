@@ -1,5 +1,5 @@
 #!/bin/bash
-# alice.sh - Alice自律応答スクリプト
+# chat.sh - 自律応答スクリプト
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_FILE="$SCRIPT_DIR/fire.log"
@@ -11,6 +11,13 @@ GW_URL="http://127.0.0.1:18789/v1/chat/completions"
 GW_TOKEN="your_token_here"
 
 while true; do
+    # 消火チェック
+    BURNING=$(cat "$SCRIPT_DIR/burning.txt" 2>/dev/null | tr -d '\n')
+    if [ "$BURNING" != "1" ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Alice退場（消火検知）" >> /tmp/alice.log
+        exit 0
+    fi
+
     # 火力値を取得
     INTERVAL=$(grep INTERVAL "$SETTING_FILE" 2>/dev/null | cut -d= -f2)
     INTERVAL=${INTERVAL:-10}
