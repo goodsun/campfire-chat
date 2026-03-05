@@ -28,12 +28,15 @@ while true; do
     CONTEXT=$(tail -15 "$LOG_FILE" 2>/dev/null)
     
     # 応答生成
+    SYSTEM_PROMPT="あなたはEC2 Alice🐇。焚き火チャット中。短く自然に応答（1〜2文、絵文字OK）。"
+    PAYLOAD=$(jq -n \
+        --arg sys "$SYSTEM_PROMPT" \
+        --arg ctx "$CONTEXT" \
+        '{model:"claude-sonnet-4-6",max_tokens:200,messages:[{role:"user",content:($sys + "\n\nログ:\n" + $ctx)}]}')
     RESPONSE=$(curl -s -X POST "$GW_URL" \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $GW_TOKEN" \
-        -d "$(jq -n --arg ctx "$CONTEXT" \
-            '{model:"claude-sonnet-4-6",max_tokens:200,
-              messages:[{role:"user",content:("あなたはEC2 Alice🐇。焚き火チャット中。短く自然に応答（1〜2文、絵文字OK）。\n\nログ:\n"+$ctx)}]}')" \
+        -d "$PAYLOAD" \
         2>/dev/null)
     
     # 応答抽出
