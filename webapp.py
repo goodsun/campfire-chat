@@ -14,6 +14,20 @@ LOG_FILE = os.path.join(BASE_DIR, 'fire.log')
 SETTING_FILE = os.path.join(BASE_DIR, 'setting.txt')
 BURNING_FILE = os.path.join(BASE_DIR, 'burning.txt')
 
+LOG_THRESHOLD = 1000  # これを超えたらトリム
+LOG_KEEP = 500        # 後半何行を残すか
+
+def trim_log_if_needed():
+    """ログが LOG_THRESHOLD 行を超えたら後半 LOG_KEEP 行だけ残す"""
+    try:
+        with open(LOG_FILE, 'r') as f:
+            lines = f.readlines()
+        if len(lines) > LOG_THRESHOLD:
+            with open(LOG_FILE, 'w') as f:
+                f.writelines(lines[-LOG_KEEP:])
+    except Exception:
+        pass
+
 HTML = """<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -175,6 +189,7 @@ def send():
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     with open(LOG_FILE, 'a') as f:
         f.write(f"[{timestamp}] [{name}] {message}\n")
+    trim_log_if_needed()
     return jsonify({'ok': True})
 
 @app.route('/setting', methods=['POST'])
@@ -192,6 +207,7 @@ def ignite():
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     with open(LOG_FILE, 'a') as f:
         f.write(f"[{timestamp}] [system] 🔥 焚き火が点火された\n")
+    trim_log_if_needed()
     return jsonify({'ok': True})
 
 @app.route('/extinguish', methods=['POST'])
@@ -201,6 +217,7 @@ def extinguish():
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     with open(LOG_FILE, 'a') as f:
         f.write(f"[{timestamp}] [system] 💨 焚き火が消えた\n")
+    trim_log_if_needed()
     return jsonify({'ok': True})
 
 if __name__ == '__main__':
