@@ -51,7 +51,7 @@ HTML = """<!DOCTYPE html>
     const msgInput = document.getElementById('msg');
     
     // SSEでログをリアルタイム表示
-    const es = new EventSource('/stream');
+    const es = new EventSource('./stream');
     es.onmessage = (e) => {
       log.textContent += e.data + '\\n';
       log.scrollTop = log.scrollHeight;
@@ -62,7 +62,7 @@ HTML = """<!DOCTYPE html>
       const name = document.getElementById('name').value || 'master';
       const msg = msgInput.value.trim();
       if (!msg) return;
-      fetch('/send', {
+      fetch('./send', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({name, message: msg})
@@ -79,7 +79,7 @@ HTML = """<!DOCTYPE html>
     function updateInterval() {
       const val = document.getElementById('interval').value;
       document.getElementById('intervalValue').textContent = val;
-      fetch('/setting', {
+      fetch('./setting', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({interval: val})
